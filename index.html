@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda de Klicklac</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #1a2a1a 0%, #0d1f0d 50%, #0a150a 100%);
+      min-height: 100vh;
+      color: #e8e8e8;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header {
+      text-align: center;
+      padding: 30px 20px;
+      background: linear-gradient(135deg, rgba(34,85,34,0.4), rgba(0,0,0,0.6));
+      border-radius: 15px;
+      margin-bottom: 25px;
+      border: 2px solid #4a7c4a;
+    }
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(90deg, #7cb342, #aed581, #7cb342);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .subtitle { color: #8bc34a; font-size: 1.1em; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 12px 20px;
+      border: 2px solid #3d5c3d;
+      border-radius: 8px;
+      background: rgba(61,92,61,0.3);
+      color: #8bc34a;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+    .tab-btn.active { background: rgba(124,179,66,0.2); border-color: #7cb342; color: #aed581; }
+    .main-content { display: flex; gap: 25px; flex-wrap: wrap; }
+    .products-section { flex: 2; min-width: 300px; }
+    .cart-section {
+      flex: 1; min-width: 280px;
+      background: linear-gradient(180deg, rgba(61,92,61,0.5), rgba(10,21,10,0.9));
+      border-radius: 15px; padding: 20px;
+      border: 2px solid #4a7c4a;
+      position: sticky; top: 20px; max-height: 80vh; overflow-y: auto;
+    }
+    .cart-title { font-size: 1.4em; color: #aed581; margin-bottom: 15px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .category-title {
+      grid-column: 1 / -1; font-size: 1.4em; color: #aed581;
+      padding: 15px 0 10px 0; border-bottom: 2px solid rgba(174,213,129,0.3); margin-bottom: 10px;
+    }
+    .product-card {
+      background: linear-gradient(135deg, rgba(61,92,61,0.4), rgba(10,21,10,0.6));
+      border-radius: 12px; padding: 20px; border: 2px solid #3d5c3d; transition: all 0.3s;
+    }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(124,179,66,0.2); border-color: #4a7c4a; }
+    .product-card.common { border-left: 4px solid #78909c; }
+    .product-card.magic { border-left: 4px solid #7e57c2; }
+    .product-card.elemental { border-left: 4px solid #ef5350; }
+    .product-card.gear { border-left: 4px solid #5c6bc0; }
+    .product-card.service { border-left: 4px solid #ffb74d; }
+    .product-name { font-size: 1.1em; font-weight: 600; margin-bottom: 8px; color: #c5e1a5; }
+    .product-type {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 0.75em; margin-bottom: 10px; font-weight: 600;
+    }
+    .common .product-type { background: #78909c; color: #fff; }
+    .magic .product-type { background: #7e57c2; color: #fff; }
+    .elemental .product-type { background: #ef5350; color: #fff; }
+    .gear .product-type { background: #5c6bc0; color: #fff; }
+    .service .product-type { background: #ffb74d; color: #1a2a1a; }
+    .effect-box {
+      display: flex; gap: 10px; align-items: center; margin-bottom: 10px;
+      padding: 8px 12px; background: rgba(124,179,66,0.15);
+      border-radius: 8px; border-left: 3px solid #7cb342;
+    }
+    .effect-icon { font-size: 1.2em; }
+    .effect-text { color: #aed581; font-size: 0.9em; font-weight: 500; }
+    .product-desc { color: #81c784; font-size: 0.85em; margin-bottom: 12px; font-style: italic; }
+    .product-footer { display: flex; justify-content: space-between; align-items: center; }
+    .product-price { font-size: 1.3em; font-weight: bold; color: #aed581; }
+    .add-btn {
+      padding: 8px 16px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg, #4a7c4a, #2e5a2e);
+      color: #fff; cursor: pointer; transition: all 0.3s; font-weight: 600;
+    }
+    .add-btn:hover { transform: scale(1.05); background: linear-gradient(135deg, #7cb342, #4a7c4a); }
+    .cart-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px; background: rgba(61,92,61,0.3);
+      border-radius: 8px; margin-bottom: 10px; border: 1px solid #3d5c3d;
+    }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 0.95em; margin-bottom: 3px; color: #c5e1a5; }
+    .cart-item-price { color: #aed581; font-size: 0.85em; }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 28px; height: 28px; border: none; border-radius: 6px;
+      background: #3d5c3d; color: #fff; cursor: pointer; font-size: 1.1em;
+    }
+    .qty-btn:hover { background: #4a7c4a; }
+    .cart-total { margin-top: 20px; padding-top: 15px; border-top: 2px solid #4a7c4a; }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .total-label { color: #81c784; }
+    .total-value { color: #aed581; font-weight: bold; }
+    .grand-total { font-size: 1.4em; margin-top: 10px; }
+    .discount-row { color: #66bb6a; }
+    .checkout-btn {
+      width: 100%; padding: 15px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg, #7cb342, #558b2f);
+      color: #fff; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 15px;
+    }
+    .checkout-btn:hover { box-shadow: 0 5px 20px rgba(124,179,66,0.4); }
+    .empty-cart { text-align: center; color: #81c784; padding: 30px; }
+    .info-section {
+      background: linear-gradient(135deg, rgba(61,92,61,0.3), rgba(10,21,10,0.6));
+      border-radius: 15px; padding: 25px; border: 2px solid #3d5c3d;
+    }
+    .info-title { font-size: 1.3em; color: #7cb342; margin-bottom: 15px; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .info-card { background: rgba(61,92,61,0.3); padding: 18px; border-radius: 10px; border: 1px solid #3d5c3d; }
+    .info-card h4 { color: #aed581; margin-bottom: 10px; }
+    .info-card p { color: #81c784; font-size: 0.9em; line-height: 1.6; }
+    .size-card {
+      background: rgba(61,92,61,0.2); border-radius: 10px; padding: 20px;
+      border: 2px solid #3d5c3d; text-align: center;
+    }
+    .size-card h4 { color: #aed581; margin-bottom: 10px; }
+    .size-price { font-size: 1.5em; color: #7cb342; font-weight: bold; margin: 10px 0; }
+    .size-examples { color: #81c784; font-size: 0.85em; }
+    .discount-badge {
+      display: inline-block; background: #66bb6a; color: #1a2a1a;
+      padding: 3px 10px; border-radius: 10px; font-size: 0.8em; margin-left: 8px; font-weight: bold;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: linear-gradient(135deg, #1a2a1a, #0a150a);
+      padding: 30px; border-radius: 15px; max-width: 500px; width: 90%;
+      border: 2px solid #7cb342; text-align: center;
+    }
+    .modal h2 { color: #aed581; margin-bottom: 20px; }
+    .modal p { color: #81c784; margin-bottom: 20px; }
+    .modal-btn {
+      padding: 12px 30px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg, #7cb342, #558b2f);
+      color: #fff; cursor: pointer; font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏹 Tienda de Klicklac</h1>
+      <p class="subtitle">Artífice Experto — Flechas, Equipamiento y Creaciones Mágicas</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('flechas')">🏹 Flechas</button>
+      <button class="tab-btn" onclick="showTab('ropa')">👕 Ropa y Equipo</button>
+      <button class="tab-btn" onclick="showTab('servicios')">🔧 Servicios</button>
+      <button class="tab-btn" onclick="showTab('creacion')">⚙️ Creación Custom</button>
+    </div>
+
+    <div id="flechas" class="tab-content active">
+      <div class="main-content">
+        <div class="products-section">
+          <div class="products-grid" id="arrows-grid"></div>
+        </div>
+        <div class="cart-section">
+          <div class="cart-title">🛒 Tu Pedido</div>
+          <div id="cart-arrows"></div>
+          <div id="total-arrows"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="ropa" class="tab-content">
+      <div class="main-content">
+        <div class="products-section">
+          <div class="products-grid" id="gear-grid"></div>
+        </div>
+        <div class="cart-section">
+          <div class="cart-title">🛒 Tu Pedido</div>
+          <div id="cart-gear"></div>
+          <div id="total-gear"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="servicios" class="tab-content">
+      <div class="main-content">
+        <div class="products-section">
+          <div class="products-grid" id="services-grid"></div>
+        </div>
+        <div class="cart-section">
+          <div class="cart-title">🛒 Tu Pedido</div>
+          <div id="cart-services"></div>
+          <div id="total-services"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="creacion" class="tab-content">
+      <div class="info-section">
+        <h3 class="info-title">⚙️ Servicios de Construcción y Creación de Objetos</h3>
+        <p style="color:#81c784;margin-bottom:20px;">Klicklac, como artífice, ofrece la creación de una amplia gama de objetos. El precio depende del tamaño, complejidad y materiales.</p>
+        
+        <div class="info-grid">
+          <div class="size-card">
+            <h4>📦 Objetos Pequeños</h4>
+            <div class="size-price">50 - 100 GP</div>
+            <p class="size-examples">Herramientas, adornos, amuletos, pequeños dispositivos mecánicos</p>
+          </div>
+          <div class="size-card">
+            <h4>📦 Objetos Medianos</h4>
+            <div class="size-price">100 - 300 GP</div>
+            <p class="size-examples">Armas simples, cajas fuertes, dispositivos mágicos menores</p>
+          </div>
+          <div class="size-card">
+            <h4>📦 Objetos Grandes</h4>
+            <div class="size-price">300 - 600 GP</div>
+            <p class="size-examples">Vehículos pequeños, armas complejas, armaduras mejoradas</p>
+          </div>
+          <div class="size-card">
+            <h4>📦 Objetos Gigantes</h4>
+            <div class="size-price">600 - 1,200 GP</div>
+            <p class="size-examples">Golems pequeños, artefactos mágicos de gran escala, maquinaria de guerra</p>
+          </div>
+        </div>
+
+        <div style="margin-top:25px;padding:20px;background:rgba(124,179,66,0.1);border-radius:10px;border-left:4px solid #7cb342;">
+          <h4 style="color:#aed581;margin-bottom:10px;">💡 Nota del Artífice</h4>
+          <p style="color:#81c784;font-size:0.9em;">Los precios finales dependen de la complejidad específica del diseño y los materiales requeridos. Consulta con Klicklac para un presupuesto personalizado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2>🏹 ¡Pedido Confirmado!</h2>
+      <p id="modal-text">Klicklac preparará tu pedido con precisión.</p>
+      <button class="modal-btn" onclick="closeModal()">¡Gracias!</button>
+    </div>
+  </div>
+
+  <script>
+    var arrowsCommon = [
+      { id: 1, name: "Flechas Comunes", price: 1, type: "common", isArrow: true, effect: null, desc: "Flechas estándar de buena calidad." },
+      { id: 2, name: "Flechas Punta Ancha", price: 5, type: "common", isArrow: true, effect: "Mayor daño a objetivos grandes", desc: "Punta ancha para causar heridas más graves." },
+      { id: 3, name: "Flechas Silbadoras", price: 8, type: "common", isArrow: true, effect: "Distracción/advertencia", desc: "Emiten un silbido al volar, perfectas para señales." },
+      { id: 4, name: "Flechas Incendiarias", price: 12, type: "common", isArrow: true, effect: "1 uso, enciende objetivo", desc: "Punta con material inflamable, causa daño por fuego." },
+      { id: 5, name: "Flechas con Gancho", price: 10, type: "common", isArrow: true, effect: "Ascender/enganchar objetos", desc: "Incluye cuerda para escalar o enganchar." }
+    ];
+
+    var arrowsMagic = [
+      { id: 10, name: "Flecha Mágica Especial", price: 50, type: "magic", isArrow: true, effect: "1d6 daño personalizable", desc: "Personaliza el tipo de daño: físico, fuego, hielo, etc." }
+    ];
+
+    var arrowsElemental = [
+      { id: 20, name: "Flecha de Fuego", price: 30, type: "elemental", isArrow: true, effect: "1d6 daño de fuego 🔥", desc: "Emite fuego al impacto, quema área pequeña." },
+      { id: 21, name: "Flecha de Congelación", price: 30, type: "elemental", isArrow: true, effect: "1d6 daño de frío ❄️", desc: "Congela área pequeña, ralentiza al objetivo." },
+      { id: 22, name: "Flecha de Relámpago", price: 30, type: "elemental", isArrow: true, effect: "1d6 daño eléctrico ⚡", desc: "Energía eléctrica que puede afectar enemigos cercanos." },
+      { id: 23, name: "Flecha de Veneno", price: 30, type: "elemental", isArrow: true, effect: "1d6 daño de veneno 💀", desc: "Veneno que causa daño continuo varios turnos." }
+    ];
+
+    var gearNormal = [
+      { id: 30, name: "Capa Impermeable", price: 25, type: "gear", effect: null, desc: "Protege de la lluvia y condiciones climáticas." },
+      { id: 31, name: "Guantes de Escalada", price: 18, type: "gear", effect: null, desc: "Mejor agarre para escalar superficies." },
+      { id: 32, name: "Botas Reforzadas", price: 30, type: "gear", effect: null, desc: "Protección extra para los pies en terreno difícil." },
+      { id: 33, name: "Camuflaje Básico", price: 20, type: "gear", effect: null, desc: "Ropa que ayuda a mezclarse con el entorno." }
+    ];
+
+    var gearMagic = [
+      { id: 40, name: "Capa de Invisibilidad Temporal", price: 120, type: "magic", effect: "Invisibilidad 1 min (1 uso/día)", desc: "Hilos encantados que otorgan invisibilidad temporal." },
+      { id: 41, name: "Botas de Silencio", price: 150, type: "magic", effect: "Desventaja en detección por sonido (1h)", desc: "Piel de sombra y magia de ocultación." },
+      { id: 42, name: "Guantes de Manipulación Arcana", price: 150, type: "magic", effect: "Ventaja en trampas/cerraduras", desc: "Manipula objetos mágicos sin activar mecanismos." },
+      { id: 43, name: "Túnica de Protección Mágica", price: 150, type: "magic", effect: "Reduce daño mágico 10%", desc: "Absorbe parte del poder de hechizos enemigos." },
+      { id: 44, name: "Túnica de Energía Arcana", price: 200, type: "magic", effect: "Recupera 1 punto hechizo/12h", desc: "Restaura energía mágica mientras se lleva puesta." }
+    ];
+
+    var services = [
+      { id: 50, name: "Reparación de Arcos", price: 15, type: "service", effect: null, desc: "Restauración completa de arcos dañados." },
+      { id: 51, name: "Reparación de Ballestas", price: 20, type: "service", effect: null, desc: "Restauración completa de ballestas dañadas." },
+      { id: 52, name: "Mejora de Precisión (Arcos)", price: 25, type: "service", effect: "+1 a tiradas de ataque", desc: "Solo para arcos, mejora la precisión." },
+      { id: 53, name: "Reparación Armadura Cuero", price: 20, type: "service", effect: null, desc: "Reparación básica de armaduras de cuero." },
+      { id: 54, name: "Mejora Durabilidad (Cuero)", price: 30, type: "service", effect: "+Resistencia", desc: "Aumenta la durabilidad de armaduras de cuero." },
+      { id: 55, name: "Mejora Camuflaje (Cuero)", price: 40, type: "service", effect: "+Sigilo", desc: "Añade propiedades de camuflaje a la armadura." },
+      { id: 56, name: "Ajuste de Equipo", price: 10, type: "service", effect: null, desc: "Ajustes menores a flechas, cuerdas, etc." },
+      { id: 57, name: "Mejora Durabilidad (Ropa)", price: 15, type: "service", effect: null, desc: "Aumenta la durabilidad de ropa y cuerdas." }
+    ];
+
+    var cart = [];
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+      document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function renderCard(item) {
+      var typeLabel = '';
+      if (item.type === 'common') typeLabel = 'Común';
+      else if (item.type === 'magic') typeLabel = 'Mágico ✨';
+      else if (item.type === 'elemental') typeLabel = 'Elemental 🔮';
+      else if (item.type === 'gear') typeLabel = 'Equipo';
+      else if (item.type === 'service') typeLabel = 'Servicio';
+
+      var effectHtml = item.effect ? '<div class="effect-box"><span class="effect-icon">✨</span><span class="effect-text">' + item.effect + '</span></div>' : '';
+      
+      return '<div class="product-card ' + item.type + '">' +
+        '<div class="product-name">' + item.name + '</div>' +
+        '<span class="product-type">' + typeLabel + '</span>' +
+        effectHtml +
+        '<div class="product-desc">"' + item.desc + '"</div>' +
+        '<div class="product-footer">' +
+        '<span class="product-price">' + item.price + ' GP</span>' +
+        '<button class="add-btn" onclick="addToCart(' + item.id + ')">+ Añadir</button>' +
+        '</div></div>';
+    }
+
+    function renderArrows() {
+      var html = '<div class="category-title">🏹 Flechas Comunes</div>';
+      for (var i = 0; i < arrowsCommon.length; i++) { html += renderCard(arrowsCommon[i]); }
+      html += '<div class="category-title">✨ Flechas Mágicas Especiales</div>';
+      for (var i = 0; i < arrowsMagic.length; i++) { html += renderCard(arrowsMagic[i]); }
+      html += '<div class="category-title">🔮 Flechas Elementales</div>';
+      for (var i = 0; i < arrowsElemental.length; i++) { html += renderCard(arrowsElemental[i]); }
+      document.getElementById('arrows-grid').innerHTML = html;
+    }
+
+    function renderGear() {
+      var html = '<div class="category-title">👕 Ropa Funcional</div>';
+      for (var i = 0; i < gearNormal.length; i++) { html += renderCard(gearNormal[i]); }
+      html += '<div class="category-title">✨ Ropa y Equipo Mágico</div>';
+      for (var i = 0; i < gearMagic.length; i++) { html += renderCard(gearMagic[i]); }
+      document.getElementById('gear-grid').innerHTML = html;
+    }
+
+    function renderServices() {
+      var html = '<div class="category-title">🔧 Reparaciones y Mejoras</div>';
+      for (var i = 0; i < services.length; i++) { html += renderCard(services[i]); }
+      document.getElementById('services-grid').innerHTML = html;
+    }
+
+    function getAllItems() {
+      return arrowsCommon.concat(arrowsMagic).concat(arrowsElemental).concat(gearNormal).concat(gearMagic).concat(services);
+    }
+
+    function addToCart(id) {
+      var allItems = getAllItems();
+      var item = null;
+      for (var i = 0; i < allItems.length; i++) {
+        if (allItems[i].id === id) { item = allItems[i]; break; }
+      }
+      if (!item) return;
+      
+      var existing = null;
+      for (var i = 0; i < cart.length; i++) {
+        if (cart[i].id === id) { existing = cart[i]; break; }
+      }
+      
+      if (existing) { existing.qty++; }
+      else { cart.push({ id: item.id, name: item.name, price: item.price, qty: 1, isArrow: item.isArrow || false }); }
+      renderCart();
+    }
+
+    function updateQty(id, delta) {
+      for (var i = 0; i < cart.length; i++) {
+        if (cart[i].id === id) {
+          cart[i].qty += delta;
+          if (cart[i].qty <= 0) { cart.splice(i, 1); }
+          break;
+        }
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      var cartHtml = '';
+      if (cart.length === 0) {
+        cartHtml = '<div class="empty-cart">🏹 ¿Qué necesitas?</div>';
+      } else {
+        for (var i = 0; i < cart.length; i++) {
+          var item = cart[i];
+          cartHtml += '<div class="cart-item"><div class="cart-item-info">' +
+            '<div class="cart-item-name">' + item.name + '</div>' +
+            '<div class="cart-item-price">' + item.price + ' GP c/u</div></div>' +
+            '<div class="cart-item-controls">' +
+            '<button class="qty-btn" onclick="updateQty(' + item.id + ', -1)">−</button>' +
+            '<span>' + item.qty + '</span>' +
+            '<button class="qty-btn" onclick="updateQty(' + item.id + ', 1)">+</button>' +
+            '</div></div>';
+        }
+      }
+
+      var cartEls = [document.getElementById('cart-arrows'), document.getElementById('cart-gear'), document.getElementById('cart-services')];
+      for (var i = 0; i < cartEls.length; i++) { if (cartEls[i]) cartEls[i].innerHTML = cartHtml; }
+
+      var totalHtml = '';
+      if (cart.length > 0) {
+        var total = 0;
+        
+        for (var i = 0; i < cart.length; i++) {
+          total += cart[i].price * cart[i].qty;
+        }
+        
+        totalHtml = '<div class="cart-total">';
+        totalHtml += '<div class="total-row grand-total"><span class="total-label">Total:</span><span class="total-value">' + total + ' GP</span></div>';
+        totalHtml += '<button class="checkout-btn" onclick="checkout()">🏹 Confirmar Pedido</button></div>';
+      }
+
+      var totalEls = [document.getElementById('total-arrows'), document.getElementById('total-gear'), document.getElementById('total-services')];
+      for (var i = 0; i < totalEls.length; i++) { if (totalEls[i]) totalEls[i].innerHTML = totalHtml; }
+    }
+
+    function checkout() {
+      var total = 0;
+      for (var i = 0; i < cart.length; i++) {
+        total += cart[i].price * cart[i].qty;
+      }
+      
+      document.getElementById('modal-text').textContent = 'Total: ' + total + ' GP. ¡Klicklac preparará tu pedido con precisión artesanal!';
+      document.getElementById('modal').classList.add('active');
+      cart = [];
+      renderCart();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    // Initialize
+    renderArrows();
+    renderGear();
+    renderServices();
+    renderCart();
+  </script>
+</body>
+</html>
